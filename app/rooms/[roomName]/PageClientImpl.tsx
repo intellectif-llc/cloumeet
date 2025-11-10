@@ -56,15 +56,37 @@ export function PageClientImpl(props: {
 
   const handlePreJoinSubmit = React.useCallback(async (values: LocalUserChoices) => {
     setPreJoinChoices(values);
-    const url = new URL(CONN_DETAILS_ENDPOINT, window.location.origin);
+    const url = new URL(CONN_DETAILS_ENDPOINT);
     url.searchParams.append('roomName', props.roomName);
     url.searchParams.append('participantName', values.username);
     if (props.region) {
       url.searchParams.append('region', props.region);
     }
-    const connectionDetailsResp = await fetch(url.toString());
-    const connectionDetailsData = await connectionDetailsResp.json();
-    setConnectionDetails(connectionDetailsData);
+    
+    console.log('Fetching from:', url.toString());
+    
+    try {
+      const connectionDetailsResp = await fetch(url.toString(), {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      console.log('Response status:', connectionDetailsResp.status);
+      
+      if (!connectionDetailsResp.ok) {
+        const errorText = await connectionDetailsResp.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP ${connectionDetailsResp.status}: ${errorText}`);
+      }
+      
+      const connectionDetailsData = await connectionDetailsResp.json();
+      console.log('Connection details:', connectionDetailsData);
+      setConnectionDetails(connectionDetailsData);
+    } catch (error) {
+      console.error('Failed to get connection details:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to connect: ${errorMessage}`);
+    }
   }, []);
   const handlePreJoinError = React.useCallback((e: any) => console.error(e), []);
 
