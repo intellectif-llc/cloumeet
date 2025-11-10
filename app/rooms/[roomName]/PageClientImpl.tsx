@@ -66,11 +66,7 @@ export function PageClientImpl(props: {
     console.log('Fetching from:', url.toString());
     
     try {
-      const connectionDetailsResp = await fetch(url.toString(), {
-        headers: {
-          'ngrok-skip-browser-warning': 'true'
-        }
-      });
+      const connectionDetailsResp = await fetch(url.toString());
       console.log('Response status:', connectionDetailsResp.status);
       
       if (!connectionDetailsResp.ok) {
